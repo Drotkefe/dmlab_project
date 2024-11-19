@@ -4,6 +4,7 @@ import sqlite3
 import pandas as pd
 import re
 import time
+import random
 
 URL = "https://www.autoscout24.hu/lst?sort=standard&desc=0&ustate=N%2CU&atype=C&source=homepage_search-mask"
 
@@ -34,57 +35,59 @@ class Car:
         return hash((self.price,self.milage,self.year))
 
 def init_db():
-    connection = sqlite3.connect("cars_data.db")
-    cursor = connection.cursor()
-    cursor.execute(''' CREATE TABLE IF NOT EXISTS cars( 
-                  BRAND TEXT NOT NULL,
-                  MODEL TEXT NOT NULL,
-                  FUEL_TYPE TEXT NOT NULL,
-                  YEAR INT NOT NULL,
-                  HORSE_POWER INT NOT NULL,
-                  MILAGE INT NOT NULL,
-                  TRANSMISSION TEXT NOT NULL,
-                  PRICE INT NOT NULL,
-                  HASH TEXT UNIQUE NOT NULL);
-              ''')
-    return cursor
+    try:
+        with sqlite3.connect("cars_data.db") as connection:
+            cursor = connection.cursor()
+            cursor.execute(''' CREATE TABLE IF NOT EXISTS cars( 
+                        [BRAND] TEXT NOT NULL,
+                        [MODEL] TEXT NOT NULL,
+                        [FUEL_TYPE] TEXT NOT NULL,
+                        [YEAR] INT NOT NULL,
+                        [HORSE_POWER] INT NOT NULL,
+                        [MILAGE] INT NOT NULL,
+                        [TRANSMISSION] TEXT NOT NULL,
+                        [PRICE] INT NOT NULL,
+                        [HASH] TEXT UNIQUE NOT NULL);
+                ''')
+            return connection
+    except:
+        print("Database initialization failed")
 
 def get_cars():
     cars=[]
     result = requests.get(URL)
     soup = bs4.BeautifulSoup(result.text,'html.parser')
+    number_of_cars=0
     pages=1
     while pages<21:
         for row in soup.find_all('article'):
-            new_car=Car()
-            new_car.brand=row['data-make']
-            new_car.model=row['data-model']
-            new_car.fuel_type=row.find('span', {'data-testid' : 'VehicleDetails-gas_pump'}).text
-            new_car.year=row['data-first-registration'][-4:]
-            new_car.horse_power=new_car.read_hp(row.find('span', {'data-testid' : 'VehicleDetails-speedometer'}).text)
-            new_car.milage=row['data-mileage']
-            new_car.transmission=row.find('span', {'data-testid' : 'VehicleDetails-transmission'}).text
-            new_car.price=row['data-price']
-            cars.append(new_car)
+            brand=row['data-make']
+            model=row['data-model']
+            fuel_type=row.find('span', {'data-testid' : 'VehicleDetails-gas_pump'}).text
+            year=row['data-first-registration'][-4:]
+            horse_power=Car.read_hp(row.find('span', {'data-testid' : 'VehicleDetails-speedometer'}).text)
+            milage=row['data-mileage']
+            transmission=row.find('span', {'data-testid' : 'VehicleDetails-transmission'}).text
+            price=row['data-price']
+            cars.append(Car(brand,model,fuel_type,year,horse_power,milage,transmission,price))
+            number_of_cars+=1
+            print('Current number of cars loaded: [%d]\r'%number_of_cars,end='')
         pages+=1
-        result= requests.get(f'https://www.autoscout24.hu/lst?atype=C&desc=0&page={pages}&search_id=16eobrdiv6y&sort=standard&source=listpage_pagination&ustate=N%2CU')
+        result= requests.get(f'https://www.autoscout24.hu/lst?atype=C&desc=0&page={pages}&search_id=xb7tyfpqh2&sort=standard&source=listpage_pagination&ustate=N%2CU')
         soup = bs4.BeautifulSoup(result.text,'html.parser')
     return cars
 
 def insert_data_to_db(data,db):
+    cursor=db.cursor()
     for car in data:
         db.execute('''INSERT OR IGNORE INTO cars (brand,model,fuel_type,year,horse_power,milage,transmission,price,hash) 
                    VALUES (?,?,?,?,?,?,?,?,?)''',(car.brand,car.model,car.fuel_type,car.year,car.horse_power,car.milage,car.transmission,car.price,car.hash))
-    db.execute('SELECT * FROM cars')
-    d=db.fetchall()
-    print()
-
+    db.commit()
+    cursor.close()
+    print("\nCar data saved to Database")
 
 if __name__ == "__main__":
-    search_ids=[
-       '16eobrdiv6y','yui93b7btz'  
-    ]
     db=init_db()
     cars=get_cars()
     insert_data_to_db(cars,db)
-    
+    db.close()
