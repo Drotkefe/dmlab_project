@@ -1,9 +1,9 @@
 import pandas as pd
 import sqlite3
 import numpy as np
+import os
 import plotly
 import plotly.express as px
-import matplotlib.pyplot as plt
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 from datetime import datetime
@@ -31,7 +31,12 @@ def load_data_into_df(db_name: str) -> pd.DataFrame:
             "Hash",
         ],
     )
+    df = df.drop("Hash", axis=1)
+    df["Year"] = datetime.now().year - df["Year"]
     return df
+
+
+df = load_data_into_df("cars_data.db")
 
 
 def fuel_type_distribution(df: pd.DataFrame, plot_name: str):
@@ -41,9 +46,7 @@ def fuel_type_distribution(df: pd.DataFrame, plot_name: str):
         count = df[df["Fuel type"] == n].shape[0]
         counts.append(count)
     fig = make_subplots(1, 1, specs=[[{"type": "domain"}]])
-    fig.add_trace(
-        go.Pie(labels=names, values=counts, title="Üzemanyag típusok eloszlása")
-    )
+    fig.add_trace(go.Pie(labels=names, values=counts, title="Fuel types distribution"))
     plotly.offline.plot(fig, filename=plot_name, auto_open=False, auto_play=False)
 
 
@@ -52,7 +55,9 @@ def best_selling_brands(df: pd.DataFrame, plot_name: str, top_n: int):
         df.Brand.value_counts().reset_index().values, columns=["Manufacturers", "Count"]
     )
     data = brand_counts.head(top_n)
-    fig = px.bar(data, x="Manufacturers", y="Count", title="Legnépszerűbb autó gyártók")
+    fig = px.bar(
+        data, x="Manufacturers", y="Count", title="Most popular car manufacturers"
+    )
     plotly.offline.plot(fig, filename=plot_name, auto_open=False, auto_play=False)
 
 
@@ -97,7 +102,7 @@ def top_modell_statistics(df: pd.DataFrame, plot_name: str):
     create_trace("Horse power", fig, 1, 2)
     create_trace("Mileage", fig, 2, 1)
     create_trace("Price", fig, 2, 2)
-    fig.update_layout(title_text=f"{top_model} statisztikák")
+    fig.update_layout(title_text=f"{top_model} statistics")
     plotly.offline.plot(fig, filename=plot_name, auto_open=False, auto_play=False)
 
 
@@ -126,7 +131,7 @@ def average_milage_for_each_brand_over_time(df: pd.DataFrame, plot_name: str):
         y="Brand",
         x="Mileage",
         histfunc="avg",
-        title="Average milage for ",
+        title="Average milage for each brand over the years",
     )
     fig.update_yaxes(categoryorder="total ascending")
     plotly.offline.plot(fig, filename=plot_name, auto_open=False, auto_play=False)
@@ -135,6 +140,7 @@ def average_milage_for_each_brand_over_time(df: pd.DataFrame, plot_name: str):
 def linear_regression_modell_for_prediction_prices(
     df: pd.DataFrame,
 ) -> LinearRegression:
+    print(df.corr())
     df = df.drop(["Model", "Transmission", "Fuel type"], axis=1)
     categories = df.dtypes == "object"
     categories_cols = list(categories[categories].index)
@@ -155,19 +161,26 @@ def linear_regression_modell_for_prediction_prices(
     model.fit(X_train, y_train)
     y_pred = model.predict(X_valid)
     print(mean_absolute_percentage_error(y_valid, y_pred))
-    return model
+    return model, one_hot_enc
 
+
+brands = df["Brand"].unique()
+years = df["Year"].unique()
+model, encoder = linear_regression_modell_for_prediction_prices(df)
 
 if __name__ == "__main__":
-    df = load_data_into_df("cars_data.db")
-    df = df.drop("Hash", axis=1)
-    df["Year"] = datetime.now().year - df["Year"]
-    # fuel_type_distribution(df, "fuel_distribution.html")
-    # best_selling_brands(df, "best_selling_car_brands.html", 20)
-    # best_selling_models(df, "best_selling_models.html", 30)
-    # top_modell_statistics(df, "top_modell_statistics.html")
-    # car_age_distribution(df, "car_age_distribution.html")
-    # median_price_variation_over_time(df, "median_price_variation_over_time.html")
-    # average_milage_for_each_brand_over_time(df, "average_milage_for_each_brand.html")
-    print(df.corr())
-    linear_regression_modell_for_prediction_prices(df)
+    template_path = "templates"
+    fuel_type_distribution(df, os.path.join(template_path, "fuel_distribution.html"))
+    best_selling_brands(
+        df, os.path.join(template_path, "best_selling_car_brands.html"), 20
+    )
+    best_selling_models(df, os.path.join(template_path, "best_selling_models.html"), 30)
+    top_modell_statistics(df, os.path.join(template_path, "top_model_statistics.html"))
+    car_age_distribution(df, os.path.join(template_path, "car_age_distribution.html"))
+    median_price_variation_over_time(
+        df, os.path.join(template_path, "median_price_variation_over_time.html")
+    )
+    average_milage_for_each_brand_over_time(
+        df, os.path.join(template_path, "average_milage_for_each_brand.html")
+    )
+    model, encoder = linear_regression_modell_for_prediction_prices(df)
