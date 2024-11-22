@@ -29,17 +29,22 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>Add New Car</h1>
-            <p>Fill in the details below to add a new car to the inventory.</p>
+            <h1>Calculate estimated car value</h1>
+            <p>Fill in the details below to find out how much your car is worth.</p>
         </div>
         <form>
             <div class="form-group">
                 <label for="brand">Brand</label>
-                <input type="text" class="form-control" id="brand" placeholder="Enter car brand" required>
+                <select class="form-control" id="brand" name="brand" required>
+                    <option value="">Select Brand</option>
+                    {% for brand in brands %}
+                        <option value="{{ brand }}">{{ brand }}</option>
+                    {% endfor %}
+                </select>
             </div>
             <div class="form-group">
                 <label for="year">Year</label>
-                <input type="number" class="form-control" id="year" placeholder="Enter year of manufacture" required>
+                <input type="number" class="form-control" id="year" placeholder="Enter age of the car" required>
             </div>
             <div class="form-group">
                 <label for="horse_power">Horse Power</label>
@@ -49,8 +54,13 @@
                 <label for="mileage">Mileage</label>
                 <input type="number" class="form-control" id="mileage" placeholder="Enter mileage" required>
             </div>
-            <button type="Estimate car price" class="btn btn-primary">Add Car</button>
+            <button type="Estimate car price" class="btn btn-primary">Calculate Price</button>
         </form>
+        {% if result %}
+            <div id="result" class="mt-4">
+                <h3>{{ price }}</h3>
+            </div>
+        {% endif %}
     </div>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
