@@ -1,7 +1,9 @@
 from flask import Flask, render_template, request
-from data_evaluation import brands, years, df_for_LR
+from data_evaluation import brands, df_for_LR
 import pandas as pd
 import joblib
+import webbrowser
+from threading import Timer
 
 app = Flask(__name__)
 
@@ -49,21 +51,11 @@ def diagramm_top_model():
 @app.route("/calculator", methods=["GET", "POST"])
 def calculate_price():
     result = None
-    new_car = pd.DataFrame(
-        {
-            "Brand": ["audi"],
-            "Year": [20],
-            "Horse power": [200],
-            "Mileage": [200000],
-        }
-    )
-    new_car_dummied = pd.get_dummies(new_car, columns=["Brand"], drop_first=True)
-    new_car_dummied = new_car_dummied.reindex(columns=df_for_LR.columns, fill_value=0)
-    # try:
-    model = joblib.load("model.pkl")
-    price = model.predict(new_car_dummied)
-    result = f"Price: € {price}"
-    print(result)
+    brand = ""
+    year = ""
+    horse_power = ""
+    mileage = ""
+
     if request.method == "POST":
         brand = request.form["brand"]
         year = int(request.form["year"])
@@ -78,20 +70,35 @@ def calculate_price():
                 "Mileage": [mileage],
             }
         )
-        # new_car_dummied = pd.get_dummies(new_car, columns=["Brand"], drop_first=True)
-        # new_car_dummied = new_car_dummied.reindex(
-        #     columns=df_for_LR.columns, fill_value=0
-        # )
-        # # try:
-        # model = joblib.load("model.pkl")
-        # price = model.predict(new_car_dummied)
-        # result = f"Price: € {price}"
-        # print(result)
-        # except:
-        result = "A problem has occurred please try again later"
 
-    return render_template("calculator.html", brands=brands, years=years, price=result)
+        df = pd.get_dummies(df_for_LR, columns=["Brand"], drop_first=True)
+        new_car_dummied = pd.get_dummies(new_car, columns=["Brand"], drop_first=True)
+        new_car_dummied = new_car_dummied.reindex(columns=df.columns, fill_value=0)
+        try:
+            model = joblib.load("model.pkl")
+            price = model.predict(new_car_dummied)
+            if price[0] > 0:
+                result = f"Price: € {int(price[0])}"
+            else:
+                result = "The model is not suitable for such specs"
+        except:
+            result = "A problem has occurred please try again later"
+
+    return render_template(
+        "calculator.html",
+        brands=brands,
+        result=result,
+        year=year,
+        brand=brand,
+        horse_power=horse_power,
+        mileage=mileage,
+    )
+
+
+def open_browser():
+    webbrowser.open_new("http:/127.0.0.1:5000")
 
 
 if __name__ == "__main__":
-    app.run()
+    Timer(1, open_browser).start()
+    app.run(port=5000)

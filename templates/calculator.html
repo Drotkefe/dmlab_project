@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add New Car</title>
+    <title>Calculate Car Value</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         body {
@@ -32,33 +32,33 @@
             <h1>Calculate estimated car value</h1>
             <p>Fill in the details below to find out how much your car is worth.</p>
         </div>
-        <form>
+        <form method="POST">
             <div class="form-group">
                 <label for="brand">Brand</label>
                 <select class="form-control" id="brand" name="brand" required>
                     <option value="">Select Brand</option>
-                    {% for brand in brands %}
-                        <option value="{{ brand }}">{{ brand }}</option>
+                    {% for b in brands %}
+                        <option value="{{ b }}" {% if b == brand %} selected {% endif %} >{{ b }}</option>
                     {% endfor %}
                 </select>
             </div>
             <div class="form-group">
                 <label for="year">Year</label>
-                <input type="number" class="form-control" id="year" placeholder="Enter age of the car" required>
+                <input type="number" class="form-control" id="year" name="year" placeholder="Enter age of the car" value="{{year}}" required>
             </div>
             <div class="form-group">
                 <label for="horse_power">Horse Power</label>
-                <input type="number" class="form-control" id="horse_power" placeholder="Enter horse power" required>
+                <input type="number" class="form-control" id="horse_power" name="horse_power" placeholder="Enter horse power" value="{{horse_power}}" required>
             </div>
             <div class="form-group">
                 <label for="mileage">Mileage</label>
-                <input type="number" class="form-control" id="mileage" placeholder="Enter mileage" required>
+                <input type="number" class="form-control" id="mileage" name="mileage" placeholder="Enter mileage" value="{{mileage}}" required>
             </div>
-            <button type="Estimate car price" class="btn btn-primary">Calculate Price</button>
+            <button type="submit" class="btn btn-primary">Calculate</button>
         </form>
         {% if result %}
             <div id="result" class="mt-4">
-                <h3>{{ price }}</h3>
+                <h3>Result: {{ result }}</h3>
             </div>
         {% endif %}
     </div>
