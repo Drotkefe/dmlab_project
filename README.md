@@ -31,6 +31,7 @@ pip install -r requirements.txt
 
 ## Usage
 ### To run the program
+Make sure you activated your virtual environment and you are using the right python.exe for running the program  
 By cloning the repository you will already have the scraped data.
 ```bash
 # You should be able to run your project by:
