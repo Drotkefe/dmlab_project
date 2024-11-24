@@ -21,11 +21,14 @@ git clone https://github.com/Drotkefe/dmlab_project.git
 ```
 Navigate to the Project Directory and
 Create a new [virtual environment](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/)
-
+```bash
+# create virtual env
+python -m venv <virtual-environment-name>
+```
 Install Dependencies:
 
 ```bash
-# Example
+# install packages
 pip install -r requirements.txt
 ```
 
