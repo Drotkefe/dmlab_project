@@ -1,10 +1,7 @@
 import bs4
 import requests
 import sqlite3
-import pandas as pd
 import re
-import time
-import random
 
 URL = "https://www.autoscout24.hu/lst?sort=standard&desc=0&ustate=N%2CU&atype=C&source=homepage_search-mask"
 
