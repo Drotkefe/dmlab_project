@@ -1,8 +1,15 @@
+# Motiváció
+A problémát azért választottam, mert mindig is szerettem az autókat, és gyerekkori álmom, hogy egy régi Jaguar XJR-t (X308) vásároljak hobbi autónak. Az első gondolatom az volt, hogy az adatok elemzésével jobban megismerhetem a mai trendeket, és gyermeki kíváncsiságom ösztönzött arra, hogy megvizsgáljak némi statisztikai adatot az autópiacról. Emellett az is motivált, hogy ha egy megrendelő hasonló projektet kérne tőlem, milyen funkciókat tartana értékesnek.
+
+Ezért kigondoltam egy lineáris regresszión alapuló megoldást, amely a bemenő paraméterek alapján meghatározza az autó aktuális piaci értékét. Az autó életkora remek prediktív képességgel bír, ezért egész jól működik az elkészült modell, de a problémát okoz, hogy az autók értéke egy idő után megáll a csökkenésben. Utólag belátom, hogy egy SVM vagy egy kisebb neurális hálózat talán bölcsebb megoldás lett volna.
+
+A projektben SQL adatbázist használtam, mivel ebben van a legtöbb tapasztalatom, és az adat struktúrájának teljesen megfelel. Az adatfeldolgozáshoz pandas-t használtam, a vizualizációhoz pedig plotly-t, mert interaktívabb diagramokat tudok vele készíteni, mint a matplotlib könyvtárral. A frontend részhez egy egyszerű webes felületet valósítottam meg amihez Flask-ot használtam. Sokat hallottam róla, hogy mennyivel egyszerűbb, mint a Django, amit eddig személyes projektjeimhez használtam, és az újdonság varázsa plusz a rendelkezésre álló időkeret befolyásolta a döntésem.
 # Used car market analysis
 
 ## Introduction
 This project is designed to scrape data from AutoScout24 and store the records in an SQL database. 
-Additionally, it generates interactive charts to visualize insights and includes a Price Calculator based on Linear Regression to help you understand how your car's value compares to the current market.  
+Additionally, it generates interactive charts to visualize insights and includes a Price Calculator based on Linear Regression to help you understand how your car's value compares to the current market  
+meanwhile providing a Front-End application created in Flask.
 
 ## Table of Contents
 - Introduction
