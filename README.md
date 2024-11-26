@@ -8,8 +8,7 @@ A projektben SQL adatbázist használtam, mivel ebben van a legtöbb tapasztalat
 
 ## Introduction
 This project is designed to scrape data from AutoScout24 and store the records in an SQL database. 
-Additionally, it generates interactive charts to visualize insights and includes a Price Calculator based on Linear Regression to help you understand how your car's value compares to the current market  
-meanwhile providing a Front-End application created in Flask.
+Additionally, it generates interactive charts to visualize insights and includes a Price Calculator based on Linear Regression to help you understand how your car's value compares to the current market meanwhile providing a Front-End application created in Flask.
 
 ## Table of Contents
 - Introduction
